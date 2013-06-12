@@ -1,0 +1,42 @@
+config setup
+    plutostart=yes
+    charonstart=no
+    nat_traversal=yes
+    nhelpers=0
+    oe=off
+    interfaces=<%= @wan_ip %>
+    uniqueids=yes
+    plutodebug=none
+    protostack=netkey
+    virtual_private=%v4:0.0.0.0/0,%v4:!<%= @wan_ip %>/24,%v4:!<%= @network_eth0 %>/24
+conn L2TP-PSK
+    type=tunnel
+    authby=secret
+    auto=add 
+    pfs=no
+    rekey=no
+    authby=xauthpsk
+    xauth=server
+    keyingtries=3
+    esp=aes256-sha1
+    ike=aes256-sha1
+    keyexchange=ikev1
+    ikelifetime=8h
+    keylife=1h
+    right=%any
+    rightsubnet=vhost:%any,%priv
+    rightprotoport=17/0
+    rightsourceip=<%= @network_eth0 %>/29
+    # Using the magic port of "0" means "any one single port". This is
+    # a work around required for Apple OSX clients that use a randomly
+    # high port, but propose "0" instead of their port.
+    left=<%= @wan_ip %>
+    leftsourceip=0.0.0.0/0
+    leftsubnet=0.0.0.0/0
+    leftprotoport=%any
+    leftfirewall=yes
+    # Apple iOS doesn't send delete notify so we need dead peer detection
+    # to detect vanishing clients
+    dpddelay=10
+    dpdtimeout=120
+    dpdaction=clear
